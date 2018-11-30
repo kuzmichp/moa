@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PerturbationMutation implements MutationPolicy {
+
     @Override
     public Chromosome mutate(Chromosome original) {
         if (!(original instanceof RealChromosome)) {

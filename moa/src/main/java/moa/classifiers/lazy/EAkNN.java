@@ -29,8 +29,8 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
 
     private static final Logger logger = Logger.getLogger(EAkNN.class.getName());
 
-    public static final IntOption kOption = new IntOption( "k", 'k', "The number of neighbors", 10, 1, Integer.MAX_VALUE);
-    public static final IntOption limitOption = new IntOption( "limit", 'w', "The maximum number of instances to store", 1000, 1, Integer.MAX_VALUE);
+    public static final IntOption kOption = new IntOption("k", 'k', "The number of neighbors", 5, 1, Integer.MAX_VALUE);
+    public static final IntOption limitOption = new IntOption("limit", 'w', "The maximum number of instances to store", 1000, 1, Integer.MAX_VALUE);
 
     // EA parameters
     public static final IntOption pOption = new IntOption("p", 'p', "The population size", 30, 10, Integer.MAX_VALUE);
@@ -38,7 +38,7 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
     public static final IntOption aOption = new IntOption("a", 'a', "The arity", 2, 2, Integer.MAX_VALUE);
     public static final FloatOption cOption = new FloatOption("c", 'c', "The crossover rate", 0.6, 0.0, Float.MAX_VALUE);
     public static final FloatOption mOption = new FloatOption("m", 'm', "The mutation rate", 0.05, 0.0, Float.MAX_VALUE);
-    public static final FloatOption lOption = new FloatOption("l", 'l', "The elitism rate", 0.05, 0.0, Float.MAX_VALUE);
+    public static final FloatOption lOption = new FloatOption("l", 'l', "The elitism rate", 0.02, 0.0, Float.MAX_VALUE);
 
     private int c = 0;
 
@@ -52,16 +52,17 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
         super.setModelContext(context);
         instanceProvider = new InstanceProvider(context, limitOption.getValue());
         cache = new FitnessCache<>();
+        int chromosomeLength = context.numAttributes() - 1;
         geneticAlgorithm = new GeneticAlgorithm(new UniformCrossover(0.5), cOption.getValue(),
                 new PerturbationMutation(), mOption.getValue(),
                 new TournamentSelection(aOption.getValue()));
         // Initialize population
         population = new ElitisticListPopulation(pOption.getValue(), lOption.getValue());
         for (int i = 0; i < pOption.getValue() - 1; i++) {
-            Chromosome chromosome = createChromosome(context.numAttributes() - 1);
+            Chromosome chromosome = createChromosome(chromosomeLength);
             population.addChromosome(chromosome);
         }
-        population.addChromosome(createUnitaryChromosome(context.numAttributes() - 1));
+        population.addChromosome(createUnitaryChromosome(chromosomeLength));
     }
 
     @Override

@@ -30,10 +30,10 @@ public class RealChromosome extends AbstractListChromosome<Double> {
     private int k;
 
     public RealChromosome(List<Double> representation,
-                   InstanceProvider instanceProvider,
-                   FitnessCache<Chromosome, Double> cache, Population population,
-                   NearestNeighbourSearch neighbourSearch,
-                   int k) {
+                          InstanceProvider instanceProvider,
+                          FitnessCache<Chromosome, Double> cache, Population population,
+                          NearestNeighbourSearch neighbourSearch,
+                          int k) {
         super(representation);
         this.instanceProvider = instanceProvider;
         this.cache = cache;
