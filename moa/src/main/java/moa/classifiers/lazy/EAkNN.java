@@ -17,11 +17,17 @@ import moa.core.Measurement;
 import org.apache.commons.math3.genetics.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
 
@@ -91,6 +97,9 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
         try {
             Instances instances = instanceProvider.getInstances();
             RealChromosome fittestChromosome = (RealChromosome) population.getFittestChromosome();
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get("solution.txt"), CREATE, APPEND)) {
+                bufferedWriter.write(fittestChromosome.toString());
+            }
             NearestNeighbourSearch search = new LinearNNSearch(instances);
             search.setDistanceFunction(new WeightedEuclideanDistance(instances, fittestChromosome.getRepresentation()));
             if (instances.size() > 0) {
@@ -101,7 +110,7 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
                 }
             }
         } catch (Exception e) {
-            String message = String.format("Unable to make prediction of instance %s class", inst);
+            String message = String.format("Unable to make prediction of instance %s", inst);
             logger.log(Level.WARNING, message);
             return new double[inst.numClasses()];
         }

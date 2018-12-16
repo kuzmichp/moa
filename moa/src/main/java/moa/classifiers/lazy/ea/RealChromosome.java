@@ -72,6 +72,8 @@ public class RealChromosome extends AbstractListChromosome<Double> {
 
     private double calculate() {
         double correctlyPredicted = 0;
+//        Instances trainingInstances = instanceProvider.getApproximatedTrainingInstances();
+//        Instances testInstances = instanceProvider.getApproximatedTestInstances();
         Instances trainingInstances = instanceProvider.getTrainingInstances();
         Instances testInstances = instanceProvider.getTestInstances();
         try {
