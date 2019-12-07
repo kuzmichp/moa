@@ -1,10 +1,29 @@
 package moa.classifiers.lazy;
 
+import java.io.BufferedWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.math3.genetics.Chromosome;
+import org.apache.commons.math3.genetics.ElitisticListPopulation;
+import org.apache.commons.math3.genetics.FixedGenerationCount;
+import org.apache.commons.math3.genetics.GeneticAlgorithm;
+import org.apache.commons.math3.genetics.Population;
+import org.apache.commons.math3.genetics.TournamentSelection;
+import org.apache.commons.math3.genetics.UniformCrossover;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
 import com.yahoo.labs.samoa.instances.Instance;
 import com.yahoo.labs.samoa.instances.Instances;
 import com.yahoo.labs.samoa.instances.InstancesHeader;
+
+import moa.capabilities.Capability;
+import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.AbstractClassifier;
 import moa.classifiers.MultiClassClassifier;
 import moa.classifiers.lazy.ea.FitnessCache;
@@ -14,20 +33,6 @@ import moa.classifiers.lazy.neighboursearch.LinearNNSearch;
 import moa.classifiers.lazy.neighboursearch.NearestNeighbourSearch;
 import moa.classifiers.lazy.neighboursearch.WeightedEuclideanDistance;
 import moa.core.Measurement;
-import org.apache.commons.math3.genetics.*;
-import org.apache.commons.math3.random.RandomGenerator;
-
-import java.io.BufferedWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
 
 public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
 
@@ -145,5 +150,13 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
     private Chromosome createUnitaryChromosome(int length) {
         List<Double> genes = new ArrayList<>(Collections.nCopies(length, 1.0));
         return new RealChromosome(genes, instanceProvider, cache, population, new LinearNNSearch(), kOption.getValue());
+    }
+
+    @Override
+    public ImmutableCapabilities defineImmutableCapabilities() {
+        if (this.getClass() == EAkNN.class)
+            return new ImmutableCapabilities(Capability.VIEW_STANDARD, Capability.VIEW_LITE);
+        else
+            return new ImmutableCapabilities(Capability.VIEW_STANDARD);
     }
 }

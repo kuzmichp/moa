@@ -17,18 +17,20 @@
  */
 package moa.classifiers.lazy;
 
-import java.io.StringReader;
+import com.github.javacliparser.IntOption;
+import com.github.javacliparser.MultiChoiceOption;
+import com.yahoo.labs.samoa.instances.Instance;
+import com.yahoo.labs.samoa.instances.Instances;
+import com.yahoo.labs.samoa.instances.InstancesHeader;
+
+import moa.capabilities.Capability;
+import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.AbstractClassifier;
 import moa.classifiers.MultiClassClassifier;
 import moa.classifiers.lazy.neighboursearch.KDTree;
 import moa.classifiers.lazy.neighboursearch.LinearNNSearch;
 import moa.classifiers.lazy.neighboursearch.NearestNeighbourSearch;
 import moa.core.Measurement;
-import com.yahoo.labs.samoa.instances.Instance;
-import com.yahoo.labs.samoa.instances.Instances;
-import com.yahoo.labs.samoa.instances.InstancesHeader;
-import com.github.javacliparser.IntOption;
-import com.github.javacliparser.MultiChoiceOption;
 
 /**
  * k Nearest Neighbor.<p>
@@ -105,7 +107,7 @@ public class kNN extends AbstractClassifier implements MultiClassClassifier {
 			} else {
 				search = new KDTree();
 				search.setInstances(this.window);
-			}	
+			}
 			if (this.window.numInstances()>0) {	
 				Instances neighbours = search.kNearestNeighbours(inst,Math.min(kOption.getValue(),this.window.numInstances()));
 				for(int i = 0; i < neighbours.numInstances(); i++) {
@@ -133,4 +135,12 @@ public class kNN extends AbstractClassifier implements MultiClassClassifier {
     public boolean isRandomizable() {
         return false;
     }
+
+	@Override
+	public ImmutableCapabilities defineImmutableCapabilities() {
+		if (this.getClass() == kNN.class)
+			return new ImmutableCapabilities(Capability.VIEW_STANDARD, Capability.VIEW_LITE);
+		else
+			return new ImmutableCapabilities(Capability.VIEW_STANDARD);
+	}
 }

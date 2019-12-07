@@ -206,6 +206,7 @@
             </includes>
             <disableXmlReport>true</disableXmlReport>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <skipTests>true</skipTests>
           </configuration>
         </plugin>
 
@@ -244,6 +245,7 @@
             <!-- avoids "-SNAPSHOT" in title when using the release.xml configuration -->
             <doctitle>${project.name}</doctitle>
             <additionalparam>-Xdoclint:none</additionalparam>
+            <skip>true</skip>
           </configuration>
         </plugin>
 
