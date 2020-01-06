@@ -1,6 +1,11 @@
 package moa.classifiers.lazy;
 
+import static java.nio.file.Files.newBufferedWriter;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+
 import java.io.BufferedWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -102,7 +107,7 @@ public class EAkNN extends AbstractClassifier implements MultiClassClassifier {
         try {
             Instances instances = instanceProvider.getInstances();
             RealChromosome fittestChromosome = (RealChromosome) population.getFittestChromosome();
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get("solution.txt"), CREATE, APPEND)) {
+            try (BufferedWriter bufferedWriter = newBufferedWriter(Paths.get("solution.txt"), CREATE, APPEND)) {
                 bufferedWriter.write(fittestChromosome.toString());
             }
             NearestNeighbourSearch search = new LinearNNSearch(instances);

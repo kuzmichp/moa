@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.yahoo.labs.samoa.instances.Instance;
+
+import io.jenetics.Chromosome;
 import io.jenetics.DoubleChromosome;
 import io.jenetics.DoubleGene;
 import io.jenetics.Genotype;
@@ -15,6 +18,7 @@ import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
+import io.jenetics.engine.Limits;
 import io.jenetics.stat.DoubleMomentStatistics;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
@@ -34,27 +38,48 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 
 	private static final int LIMIT = 1000;
 	private static final double TRAINING_TO_ALL_RATIO = 0.7;
+	private static final int POPULATION_SIZE = 30;
+	private static final int MAX_EPOCHS = 100;
+	private static final int STEADINESS = 10;
 	private static final int K = 30;
+	private static int I = 1;
 	private int c;
 
 	private transient DataProvider dataProvider;
+	private transient Genotype<DoubleGene> genotype;
 
 	@Override
 	public double[] getVotesForInstance(com.yahoo.labs.samoa.instances.Instance inst) {
 		LearningData learningData = dataProvider.getLearningData();
-		Factory<Genotype<DoubleGene>> genotypeFactory = Genotype.of(DoubleChromosome.of(0, 1, inst.numInputAttributes()));
-		Engine<DoubleGene, Double> engine = Engine.builder(g -> eval(g, learningData), genotypeFactory)
-				.mapping(toUniquePopulation())
-				.populationSize(100)
-				.build();
+		if (dataProvider.modelIsOutdated() || genotype == null) {
+			createOrUpdateModel(inst, learningData);
+		}
+		return predict(inst, learningData, genotype);
+	}
+
+	private void createOrUpdateModel(Instance inst, LearningData learningData) {
+		Factory<Genotype<DoubleGene>> genotypeFactory = null;
+		Engine.Builder<DoubleGene, Double> builder = null;
+		if (genotype == null) {
+			genotypeFactory = Genotype.of(DoubleChromosome.of(0, 1, inst.numInputAttributes()));
+			builder = Engine.builder(g -> eval(g, learningData), genotypeFactory);
+		} else {
+			Chromosome<DoubleGene> chromosome = genotype.getChromosome();
+			builder = Engine.builder(g -> eval(g, learningData), chromosome);
+		}
 		EvolutionStatistics<Double, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber();
-		Genotype<DoubleGene> genotype = engine.stream()
-				.limit(10000)
+		Engine<DoubleGene, Double> engine = builder.mapping(toUniquePopulation())
+				.populationSize(POPULATION_SIZE)
+				.build();
+		genotype = engine.stream()
+				.limit(Limits.bySteadyFitness(STEADINESS))
+				.limit(MAX_EPOCHS)
 				.peek(statistics)
 				.peek(this::monitor)
 				.collect(toBestGenotype());
 		System.out.println(statistics.toString());
-		return predict(inst, learningData, genotype);
+		dataProvider.reset();
+		I++;
 	}
 
 	private void monitor(EvolutionResult<DoubleGene, Double> evolutionResult) {
@@ -63,8 +88,12 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 				.getChromosome()
 				.stream()
 				.mapToDouble(DoubleGene::doubleValue).toArray();
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter("ea.csv", true))) {
-			writer.append(String.format("%f,%f%n",weights[0], weights[1]));
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(String.format("vavel-ea-%d.csv", I), true))) {
+			for (double weight : weights) {
+				writer.append(String.format("%.2f,", weight));
+			}
+			writer.newLine();
+			//writer.append(String.format("%f,%f%n",weights[0], weights[1]));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -72,9 +101,14 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 
 	private double eval(Genotype<DoubleGene> g, LearningData learningData) {
 		double[] weights = g.getChromosome().stream().mapToDouble(DoubleGene::doubleValue).toArray();
-		KNN<double[]> knn = KNN.fit(learningData.getTrainingAttributes(), learningData.getTrainingClasses(),
-				new EuclideanDistance(weights), K);
-		return computeFitness(learningData.getTestClasses(), knn.predict(learningData.getTestAttributes()));
+		try {
+			KNN<double[]> knn = KNN.fit(learningData.getTrainingAttributes(), learningData.getTrainingClasses(),
+					new EuclideanDistance(weights), K);
+			return computeFitness(learningData.getTestClasses(), knn.predict(learningData.getTestAttributes()));
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			return 0;
+		}
 	}
 
 	private static double computeFitness(int[] expected, int[] predicted) {
@@ -86,11 +120,16 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 		double[] weights = genotype.getChromosome().stream()
 				.mapToDouble(DoubleGene::doubleValue)
 				.toArray();
-		KNN<double[]> knn = KNN.fit(data.getAllAttributes(), data.getAllClasses(), new EuclideanDistance(weights), K);
-		int prediction = knn.predict(Arrays.copyOf(inst.toDoubleArray(), inst.numInputAttributes()));
 		double[] votes = new double[c + 1];
-		votes[prediction] = 1;
-		return votes;
+		try {
+			KNN<double[]> knn = KNN.fit(data.getAllAttributes(), data.getAllClasses(), new EuclideanDistance(weights), K);
+			int prediction = knn.predict(Arrays.copyOf(inst.toDoubleArray(), inst.numInputAttributes()));
+			votes[prediction] = 1;
+			return votes;
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			return votes;
+		}
 	}
 
 	private void consumeOneGenerationResult(EvolutionResult<DoubleGene, Double> result) {

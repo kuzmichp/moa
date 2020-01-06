@@ -16,6 +16,8 @@ public class DataProvider {
 	private final int limit;
 	private final double ratio;
 
+	private int processedSinceLastUpdate;
+
 	/**
 	 * Initializes a data provider with a buffer size and a training to all instances ratio.
 	 *
@@ -38,10 +40,20 @@ public class DataProvider {
 			instances.removeFirst();
 		}
 		instances.addLast(new Instance(instance));
+		processedSinceLastUpdate++;
 	}
 
 	public LearningData getLearningData() {
 		return new LearningData(instances, ratio);
+	}
+
+	public boolean modelIsOutdated() {
+		return processedSinceLastUpdate >= 500;
+	}
+
+	public void reset() {
+		System.out.println("Hello, reset!");
+		processedSinceLastUpdate = 0;
 	}
 
 	public static class LearningData {
