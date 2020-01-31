@@ -27,7 +27,7 @@ public class StreamGeneratorTest {
 	public void shouldVisualize() throws IOException {
 		List<double[]> x = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader("ea.csv"))) {
-			reader.lines().limit(200).forEach(l -> {
+			reader.lines().limit(98).forEach(l -> {
 				double[] weights = Arrays.stream(l.split(","))
 						.mapToDouble(Double::parseDouble)
 						.toArray();

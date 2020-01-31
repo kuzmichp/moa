@@ -15,6 +15,7 @@ import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
+import io.jenetics.engine.Limits;
 import io.jenetics.stat.DoubleMomentStatistics;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
@@ -49,6 +50,7 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 				.build();
 		EvolutionStatistics<Double, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber();
 		Genotype<DoubleGene> genotype = engine.stream()
+				.limit(Limits.bySteadyFitness(10))
 				.limit(10000)
 				.peek(statistics)
 				.peek(this::monitor)
