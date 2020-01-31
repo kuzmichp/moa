@@ -20,22 +20,21 @@
  */
 package moa.gui;
 
-import com.jidesoft.swing.JideButton;
-import com.jidesoft.swing.JideSplitButton;
-import moa.DoTask;
-import moa.core.WekaUtils;
-import nz.ac.waikato.cms.gui.core.GUIHelper;
-import nz.ac.waikato.cms.gui.core.MultiPagePane;
-
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.swing.*;
+
+import com.jidesoft.swing.JideButton;
+import com.jidesoft.swing.JideSplitButton;
+
+import moa.DoTask;
+import moa.core.WekaUtils;
+import nz.ac.waikato.cms.gui.core.GUIHelper;
+import nz.ac.waikato.cms.gui.core.MultiPagePane;
 
 /**
  * The main class for the MOA gui. Lets the user configure

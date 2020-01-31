@@ -286,6 +286,7 @@ public class EvaluatePeriodicHeldOutTest extends ClassificationMainTask {
         if (immediateResultStream != null) {
             immediateResultStream.close();
         }
+        learner.draw();
         return learningCurve;
     }
 

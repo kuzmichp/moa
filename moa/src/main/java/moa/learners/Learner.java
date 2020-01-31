@@ -133,6 +133,8 @@ public interface Learner<E extends Example> extends MOAObject, OptionHandler, AW
     public InstancesHeader getModelContext();
 
 	public Prediction getPredictionForInstance(E testInst);
+
+    default void draw() {};
 }
 
 

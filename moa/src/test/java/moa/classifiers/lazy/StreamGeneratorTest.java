@@ -3,6 +3,7 @@ package moa.classifiers.lazy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,12 +19,12 @@ public class StreamGeneratorTest {
 
 	private final StreamGenerator generator = new StreamGenerator();
 
-//	@Test
-//	public void shouldGenerateStream() throws IOException {
-//		generator.generate(1050, new FileWriter("1050.csv"));
-//	}
-
 	@Test
+	public void shouldGenerateStream() throws IOException {
+		generator.generate(1050, new FileWriter("1050.csv"));
+	}
+
+	//@Test
 	public void shouldVisualize() throws IOException {
 		List<double[]> x = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader("ea.csv"))) {
