@@ -27,21 +27,26 @@ public class StreamGeneratorTest {
 	public void shouldVisualize() throws IOException {
 		List<double[]> x = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader("ea.csv"))) {
-			reader.lines().limit(98).forEach(l -> {
+			reader.lines().limit(16).forEach(l -> {
 				double[] weights = Arrays.stream(l.split(","))
 						.mapToDouble(Double::parseDouble)
 						.toArray();
 				x.add(weights);
 			});
 		}
+//		x.add(new double[] {1., 1.});
+//		x.add(new double[] {0., 0.});
 		visualize(x.stream().toArray(double[][]::new));
 	}
 
 	private void visualize(double[][] x) throws IOException {
-		PlotCanvas scatterPlot = ScatterPlot.plot(x, '#');
-		Headless headless = new Headless(scatterPlot);
+		PlotCanvas canvas = new PlotCanvas(new double[] { 0.0, 0.0 }, new double[] { 1.0, 1.0 });
+		ScatterPlot plot = new ScatterPlot(x, '#');
+		plot.setID("1");
+		canvas.add(plot);
+		Headless headless = new Headless(canvas);
 		headless.pack();
 		headless.setVisible(true);
-		scatterPlot.save(new File("best-individuals.png"));
+		canvas.save(new File("best-individuals.png"));
 	}
 }

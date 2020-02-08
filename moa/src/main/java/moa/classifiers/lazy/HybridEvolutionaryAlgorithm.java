@@ -1,6 +1,6 @@
 package moa.classifiers.lazy;
 
-import static io.jenetics.engine.EvolutionResult.toBestGenotype;
+import static io.jenetics.engine.EvolutionResult.toBestEvolutionResult;
 import static io.jenetics.engine.EvolutionResult.toUniquePopulation;
 
 import java.io.BufferedWriter;
@@ -39,23 +39,27 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 	private int c;
 
 	private transient DataProvider dataProvider;
+	private transient Genotype<DoubleGene> genotype;
 
 	@Override
 	public double[] getVotesForInstance(com.yahoo.labs.samoa.instances.Instance inst) {
 		LearningData learningData = dataProvider.getLearningData();
-		Factory<Genotype<DoubleGene>> genotypeFactory = Genotype.of(DoubleChromosome.of(0, 1, inst.numInputAttributes()));
-		Engine<DoubleGene, Double> engine = Engine.builder(g -> eval(g, learningData), genotypeFactory)
-				.mapping(toUniquePopulation())
-				.populationSize(100)
-				.build();
-		EvolutionStatistics<Double, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber();
-		Genotype<DoubleGene> genotype = engine.stream()
-				.limit(Limits.bySteadyFitness(10))
-				.limit(10000)
-				.peek(statistics)
-				.peek(this::monitor)
-				.collect(toBestGenotype());
-		System.out.println(statistics.toString());
+		if (genotype == null) {
+			Factory<Genotype<DoubleGene>> genotypeFactory = Genotype.of(DoubleChromosome.of(0, 1, inst.numInputAttributes()));
+			Engine<DoubleGene, Double> engine = Engine.builder(g -> eval(g, learningData), genotypeFactory)
+					.mapping(toUniquePopulation())
+					.populationSize(100)
+					.build();
+			EvolutionStatistics<Double, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber();
+			EvolutionResult<DoubleGene, Double> evolutionResult = engine.stream()
+					.limit(Limits.bySteadyFitness(10))
+					.limit(100)
+					.peek(statistics)
+					.peek(this::monitor)
+					.collect(toBestEvolutionResult());
+			genotype = evolutionResult.getBestPhenotype().getGenotype();
+			System.out.println(statistics.toString());
+		}
 		return predict(inst, learningData, genotype);
 	}
 
