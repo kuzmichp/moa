@@ -27,9 +27,10 @@ public class HybridEvolutionaryAlgorithm extends AbstractClassifier implements M
 		model = ModelImpl.Builder.create()
 				.populationSize(100)
 				.maxEpochs(100)
+				.eliteCount(4)
 				.steadiness(10)
 				.limit(1000)
-				.k(30)
+				.k(50)
 				.build();
 	}
 
